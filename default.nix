@@ -1,30 +1,16 @@
-{ compiler    ? "ghc822"
-, doBenchmark ? false
-, doTracing   ? false
-, doStrict    ? false
-, rev         ? "d1ae60cbad7a49874310de91cd17708b042400c8"
-, sha256      ? "0a1w4702jlycg2ab87m7n8frjjngf0cis40lyxm3vdwn7p4fxikz"
-, pkgs        ? import (builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/${rev}.tar.gz";
-    inherit sha256; }) {
-    config.allowUnfree = true;
-    config.allowBroken = false;
-  }
-, returnShellEnv ? pkgs.lib.inNixShell
-, mkDerivation ? null
+{ mkDerivation, base, binary, bytestring, fast-logger, hspec
+, lifted-base, monad-control, old-locale, regex-compat, stdenv
+, text, time, time-locale-compat, transformers, unix
 }:
-
-let haskellPackages = pkgs.haskell.packages.${compiler};
-
-in haskellPackages.developPackage {
-  root = ./.;
-
-  source-overrides = {
-  };
-
-  modifier = drv: pkgs.haskell.lib.overrideCabal drv (attrs: {
-    inherit doBenchmark;
-  });
-
-  inherit returnShellEnv;
+mkDerivation {
+  pname = "logging";
+  version = "3.0.5";
+  src = ./.;
+  libraryHaskellDepends = [
+    base binary bytestring fast-logger lifted-base monad-control
+    old-locale regex-compat text time time-locale-compat transformers
+  ];
+  testHaskellDepends = [ base hspec unix ];
+  description = "Simplified logging in IO for application writers";
+  license = stdenv.lib.licenses.mit;
 }
