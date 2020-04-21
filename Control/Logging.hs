@@ -60,6 +60,7 @@ module Control.Logging
     , setLogLevel
     , setLogTimeFormat
     , setDebugSourceRegex
+    , setLogFile
     , LogLevel (..)
     ) where
 
@@ -120,6 +121,13 @@ setDebugSourceRegex =
         . Just
         . mkRegex
 
+-- TODO fix "resource budy (file is locked)" when re-opening the same file again
+--      (will require forking fast-logger to edit newFileLoggerSet)
+setLogFile :: FilePath -> IO ()
+setLogFile path = do
+    flushLog
+    set <- newFileLoggerSet defaultBufSize path
+    atomicWriteIORef logSet set
 
 loggingLogger :: ToLogStr msg => LogLevel -> LogSource -> msg -> IO ()
 loggingLogger !lvl !src str = do
@@ -167,6 +175,9 @@ withStderrLogging f = do
         set <- newStderrLoggerSet defaultBufSize
         atomicWriteIORef logSet set
     f `finally` flushLog
+
+-- currentLogFile :: IORef (Maybe FilePath)
+-- currentLogFile = undefined -- TODO is this the right way?
 
 withFileLogging :: (MonadBaseControl IO m, MonadIO m) => FilePath -> m a -> m a
 withFileLogging path f = do
