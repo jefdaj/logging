@@ -11,13 +11,15 @@ env:
     - GHCVERSION=ghc802
     - GHCVERSION=ghc822
     - GHCVERSION=ghc843
+    - GHCVERSION=ghc884
+    - GHCVERSION=ghc8104
 
 matrix:
   allow_failures:
   exclude:
 
 script:
-  - nix-build --argstr compiler $GHCVERSION
+  - nix-build release.nix --argstr compiler $GHCVERSION
 
 branches:
   only:
